@@ -1,4 +1,4 @@
-//Pongo by Mongo ;-))))
+//Pongo by Mongo ;-)))))
 #include <Esplora.h>
 #include <TFT.h>            // Arduino LCD library
 #include <SPI.h>
