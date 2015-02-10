@@ -1,4 +1,6 @@
-//Pongo by Mongo ;-)))))
+//Pongo by WaDoMa ;-)
+//Extended version of the original example
+
 #include <Esplora.h>
 #include <TFT.h>            // Arduino LCD library
 #include <SPI.h>
@@ -32,30 +34,36 @@ paddle paddle1={};
 
 void setup()
 {
-  EsploraTFT.begin();  // initialize the display
+  EsploraTFT.begin();   // initialize the display
   EsploraTFT.background(0, 0, 0);  // set the background the black
   scr = {EsploraTFT.width(),EsploraTFT.height()};  //determine and store resolution of screen
-  ball1 = {0,0,NULL,NULL,1.1,1.5,5,5,255,255,255};  //initialize ball position to upper left corner, ball trajectory
-  paddle1 = {scr.resolution_h/2,scr.resolution_v/2,NULL,NULL,20,5,255,255,255};  //initialize paddle position to the middle of the screen
+  ball1 = {0,0,NULL,NULL,1.1,1.5,5,5,255,255,255};  //initialize ball position to upper left corner, ball trajectory, dimensions and color
+  paddle1 = {scr.resolution_h/2,scr.resolution_v/2,NULL,NULL,20,5,255,255,255};  //initialize paddle position to the middle of the screen, dimensions and color
 }
 
 void loop()
 {
-  int ballSpeed = 0;
+  int ballmovementintervall = 0;  //Initializes a variable, which stores the waiting time in Arduino-"millis" before moving the ball to its next position. This is de facto the game speed.
   paddle1.x = map(Esplora.readJoystickX(), 512, -512, 0, scr.resolution_h) - paddle1.width / 2;
   paddle1.y = map(Esplora.readJoystickY(), -512, 512, 0, scr.resolution_v) - paddle1.height / 2;
-  EsploraTFT.fill(0, 0, 0);  // set the fill color to black and erase the previous position of the paddle if different from present
-  if (paddle1.previous_x != paddle1.x || paddle1.previous_y != paddle1.y)
+  EsploraTFT.fill(0, 0, 0);  // set the fill color to black 
+  if (paddle1.previous_x != paddle1.x || paddle1.previous_y != paddle1.y)  //erases the previous position of the paddle if different from present
   {
-    EsploraTFT.rect(paddle1.previous_x, paddle1.previous_y, paddle1.width, paddle1.height);
+    EsploraTFT.rect(paddle1.previous_x, paddle1.previous_y, paddle1.width, paddle1.height);  //blacken old paddle
   }
-  EsploraTFT.fill(paddle1.col_r, paddle1.col_b, paddle1.col_g);  // draw the paddle on screen, save the current position as the previous
-  EsploraTFT.rect(paddle1.x, paddle1.y, paddle1.width, paddle1.height);
+  EsploraTFT.fill(paddle1.col_r, paddle1.col_b, paddle1.col_g);  //set fill color to paddle color
+  EsploraTFT.rect(paddle1.x, paddle1.y, paddle1.width, paddle1.height);  //draw the paddle on screen and save the current position as the previous
   paddle1.previous_x = paddle1.x;
   paddle1.previous_y = paddle1.y;
   
-  ballSpeed = map(Esplora.readSlider(), 0, 1023, 0, 80) + 1;   // read the slider to determinde the speed of the ball
-  if (millis() % ballSpeed < 2)
+  ballmovementintervall = map(Esplora.readSlider(), 0, 1023, 0, 80) + 1;   // Reads and maps the slider position to determine the speed of the ball. Here, "80" results into the minimum speed and "0" into the maximum speed.
+  Serial.print(millis());  //output millis for debugging
+  Serial.print("\t");
+  Serial.print(ballSpeed);  //output ball speed for debugging
+  Serial.print("\t");
+  Serial.print(millis() % ballSpeed);  //output calc for debugging
+  Serial.print("\n");
+  if (millis() % ballmovementintervall < 2)  //conditon gets periodically TRUE as times goes by 
   {
     moveBall();
   }
@@ -73,7 +81,7 @@ void moveBall()
     ball1.delta_y = -ball1.delta_y;
   }
 
-  // check if the ball and the paddle occupy the same space on screen
+  // check if the ball and the paddle are occupying the same space on screen
   if (inPaddle(ball1.x, ball1.y, paddle1.x, paddle1.y, paddle1.width, paddle1.height))
   {
     ball1.delta_y = -ball1.delta_y;
@@ -93,13 +101,13 @@ void moveBall()
   ball1.previous_x = ball1.x;  //store present to previous position
   ball1.previous_y = ball1.y;
   
-  Serial.print(ball1.x);  //output ball position for debugging
+  /*Serial.print(ball1.x);  //output ball position for debugging
   Serial.print("\t");
   Serial.print(ball1.y);
   Serial.print("\t");
   Serial.print(ball1.delta_x);
   Serial.print("\t");
-  Serial.println(ball1.delta_y); 
+  Serial.println(ball1.delta_y); */
   
 }
 
